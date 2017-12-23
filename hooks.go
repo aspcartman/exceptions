@@ -1,6 +1,6 @@
 package e
 
-var hooks []func(ex Exception)
+var hooks []func(ex *Exception)
 
 /*
 	Hooks are called every time exception is thrown.
@@ -10,12 +10,12 @@ var hooks []func(ex Exception)
  */
 
 //go:norace
-func RegisterHook(f func(ex Exception)) {
+func RegisterHook(f func(ex *Exception)) {
 	hooks = append(hooks, f)
 }
 
 //go:norace
-func ExecHooks(ex Exception) {
+func ExecHooks(ex *Exception) {
 	for _, h := range hooks {
 		h(ex)
 	}

@@ -14,13 +14,13 @@ func (e Exception) Error() string {
 	return e.SmartError.Error()
 }
 
-func Catch(handler func(e Exception)) {
+func Catch(handler func(e *Exception)) {
 	if r := recover(); r != nil {
 		handle(r, handler)
 	}
 }
 
-func OnError(handler func(e Exception)) {
+func OnError(handler func(e *Exception)) {
 	if r := recover(); r != nil {
 		handle(r, handler)
 		panic(r)
@@ -28,7 +28,7 @@ func OnError(handler func(e Exception)) {
 }
 
 func Throw(info string, cause error, args ...Map) {
-	exception := Exception{wrap(info, cause, args...)}
+	exception := &Exception{wrap(info, cause, args...)}
 	ExecHooks(exception)
 	panic(exception)
 }
@@ -39,19 +39,18 @@ func Must(err error, info string, args ...Map) {
 	}
 }
 
-func handle(r interface{}, handler func(e Exception)) {
-	var exception Exception
+func handle(r interface{}, handler func(e *Exception)) {
+	var exception *Exception
 	switch e := r.(type) {
-	case Exception:
+	case *Exception:
 		exception = e
 	case error:
-		exception = Exception{wrap("third party exception", e)}
+		exception = &Exception{wrap("third party exception", e)}
 	default:
-		exception = Exception{wrap("third party exception", nil, Map{
+		exception = &Exception{wrap("third party exception", nil, Map{
 			"recovered": e,
 		})}
 	}
 
-	ExecHooks(exception)
 	handler(exception)
 }
